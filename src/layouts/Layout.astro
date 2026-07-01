@@ -1,0 +1,49 @@
+---
+import "../styles/global.css";
+import { withBase } from "../utils/url";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Research, projects, and writing." } = Astro.props;
+const navItems = [
+  { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
+  { href: "/research", label: "Research" },
+  { href: "/philosophy", label: "Philosophy" },
+  { href: "/skills", label: "Skills" },
+  { href: "/cv", label: "CV" },
+  { href: "/contact", label: "Contact" },
+];
+const currentPath = Astro.url.pathname;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" href={withBase("/favicon.svg")} type="image/svg+xml" />
+    <title>{title} — Valerie Ha</title>
+  </head>
+  <body>
+    <nav class="site-nav">
+      {navItems.map((item) => (
+        <a
+          href={withBase(item.href)}
+          aria-current={currentPath === withBase(item.href) ? "page" : undefined}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+    <main class="site-wrap">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>Valerie Ha &middot; Updated {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}</p>
+    </footer>
+  </body>
+</html>

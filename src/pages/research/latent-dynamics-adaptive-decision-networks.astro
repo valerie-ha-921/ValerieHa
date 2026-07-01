@@ -1,0 +1,75 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Figure from "../../components/Figure.astro";
+---
+<Layout title="Latent Dynamics in Adaptive Decision-Making Networks">
+  <p class="section-label">Research &middot; In progress</p>
+  <h1>Understanding Latent Dynamics in Adaptive Decision-Making Networks</h1>
+  <p class="grey-italics">Research done under the mentorship of Cheng Xue</p>
+
+  <h2>Problem</h2>
+  <p>
+    Adaptive behavior often appears simple, but the computations supporting it remain hidden. 
+    In this project, I am investigating whether a recurrent neural network trained to solve the same probabilistic foraging task as a macaque develops internal representations analogous to those supporting biological decision-making. 
+    More broadly, I wanted to understand which analyses reveal the computations underlying adaptive behavior.
+  </p>
+
+  <h2>Why it matters</h2>
+  <p>
+    As machine learning models and neural recording technologies become increasingly widespread and powerful, behavior alone is not enough to explain intelligent systems. 
+    Two models can produce nearly identical decisions while relying on fundamentally different internal representations, making it difficult to know whether they solve problems in the same way. 
+    I believe that developing methods to characterize and compare these latent computations is essential for building interpretable AI, understanding biological intelligence, and ultimately designing trustworthy neurotechnologies.
+  </p>
+
+  <h3>Task diagram</h3>
+       <Figure src="/images/research/latent-dynamics-adaptive-decision-networks/task_diagram.svg"
+               alt="Foraging task structure"
+               caption="Task structure: reward contingencies switch on an uncued schedule." />
+
+  <h2>Methods</h2>
+  <p>This project investigates how recurrent neural networks develop internal representations while solving a dynamic foraging task inspired by non-human primate experiments. 
+  On each trial, the agent chooses between two images with hidden reward probabilities that periodically reverse, requiring continual adaptation to an uncertain environment. 
+  Using only the previous action and reward as input, the monkey and network must infer the latent state of the environment and learn a policy that maximizes long-term reward.</p>
+
+  <h3>Task</h3>
+  <p>The task is a two-alternative probabilistic decision-making paradigm in which one image is assigned a high reward probability and the other a low reward probability. 
+  The identity of the higher-value image reverses unpredictably throughout each session, forcing the agent to integrate reward history over time rather than relying on immediate feedback. 
+  This design encourages sequential decision-making under uncertainty and mirrors the behavioral task performed by macaque monkeys.</p>
+
+  <h3>Architecture</h3>
+  <p>The agent is implemented as a recurrent neural network with gated recurrent units (GRUs) trained using an actor-critic reinforcement learning framework. 
+  At each trial, the network receives the previous action and previous reward as input, updates its hidden state, and produces both an action policy and a value estimate. 
+  The hidden state serves as an internal memory, allowing the network to integrate evidence across trials and adapt its behavior as reward contingencies change.</p>
+
+  <h3>Pipeline</h3>
+        <Figure src="/images/research/latent-dynamics-adaptive-decision-networks/computational_pipeline.svg"
+               alt="Foraging task structure"
+               caption="Computational pipeline: comparing models of adaptive decision making" />
+
+  <h2>Results</h2>
+
+  <h3>Behavioral reward rate</h3>
+        <Figure src="/images/research/latent-dynamics-adaptive-decision-networks/reward_rate_barplot.png"
+               alt="Foraging task structure"/>
+
+  <h3>Fixed points and basin assignments</h3>
+        <Figure src="/images/research/latent-dynamics-adaptive-decision-networks/pca_basin_optimal.png"
+               alt="Foraging task structure"
+               caption="Optimal RNN" />
+        <Figure src="/images/research/latent-dynamics-adaptive-decision-networks/pca_basin_finetuned.png"
+               alt="Foraging task structure"
+               caption="Monkey-finetuned RNN" />
+        <Figure src="/images/research/latent-dynamics-adaptive-decision-networks/attractor_basins.svg"
+               alt="Foraging task structure"
+               caption="Behavioral categorization of attractor basins per model" />
+
+  <h3>GLM-HMM states</h3>
+        <Figure src="/images/research/latent-dynamics-adaptive-decision-networks/k4_belief_and_k_per_state.png"
+               alt="Foraging task structure"/>
+        <Figure src="/images/research/latent-dynamics-adaptive-decision-networks/k4_periswitch_allstates.png"
+               alt="Foraging task structure"/>
+        <Figure src="/images/research/latent-dynamics-adaptive-decision-networks/k4_weights.png"
+               alt="Foraging task structure"/>
+
+  <h3>Neuronal data</h3>
+</Layout>

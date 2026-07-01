@@ -1,0 +1,27 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { withBase } from "../utils/url";
+---
+<Layout title="Home">
+  <img class="headshot" src={withBase("/headshot.jpg")} alt="Headshot of Valerie Ha" />
+
+  <h1>Valerie Ha</h1>
+  <p class="identity-line">Computational Neuroscience &times; Machine Learning &times; Quantum Engineering</p>
+
+  <p>
+    I build computational models to understand how intelligent systems learn, remember, and make decisions under uncertainty. 
+    I am curious to uncover the principles of memory, agency, and adaptive behavior that span biological and artificial intelligence.
+    Over the long term, I hope to translate these insights to develop neurotechnology and, eventually, quantum-enabled systems for sensing and intelligent computation.
+  </p>
+
+  <div class="links-row">
+    <a href="https://www.linkedin.com/in/valerie-ha/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href={withBase("/cv")}>CV</a>
+    <a href="mailto:valerieha@uchicago.edu">Email</a>
+  </div>
+
+  <h2>Currently</h2>
+  <p>
+    I'm working on the modeling of dynamic behavior.
+  </p>
+</Layout>

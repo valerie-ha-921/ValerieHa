@@ -1,0 +1,26 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const groups = [
+  { name: "Machine Learning", items: ["PyTorch", "JAX", "TensorFlow"] },
+  { name: "Scientific Computing", items: ["NumPy", "SciPy", "MATLAB"] },
+  { name: "Statistics", items: ["GLMs", "HMMs", "Bayesian inference"] },
+  { name: "Data", items: ["pandas", "SQL"] },
+  { name: "Visualization", items: ["matplotlib", "Plotly"] },
+  { name: "Neuroscience", items: ["Population analysis", "Decoding", "Manifold learning"] },
+];
+---
+<Layout title="Skills">
+  <p class="section-label">Skills</p>
+  <h1>Skills</h1>
+  <div class="skills-grid">
+    {groups.map((g) => (
+      <div>
+        <h3>{g.name}</h3>
+        <ul>
+          {g.items.map((item) => <li>{item}</li>)}
+        </ul>
+      </div>
+    ))}
+  </div>
+</Layout>

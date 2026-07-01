@@ -1,0 +1,37 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Figure from "../../components/Figure.astro";
+---
+<Layout title="Big Data on Little People">
+  <p class="section-label">Submitted to the Field Methods &middot; Under Review</p>
+  <h1>Big Data on Little People: Towards Early Skill Assessment at Scale in Resource-poor Field Settings</h1>
+  <p class="grey-italics">Research done under the mentorship of Dorien Emmers and Scott Rozelle</p>
+
+  <h2>Problem</h2>
+  <p>
+    The Bayley-III is widely treated as a gold-standard early childhood development assessment, but it is too long, expensive, and labor-intensive for large-scale use in rural communities. 
+    This project asked: Can we reduce the Bayley-III to a much shorter assessment while preserving enough validity to make it useful for population-level screening and intervention evaluation?
+  </p>
+
+  <h2>Why it matters</h2>
+  <p>
+    Early developmental delays are common in low-resource settings, but measuring them reliably is difficult. 
+    A shorter, validated assessment could make it easier for researchers and policymakers to identify developmental risk, evaluate interventions, and allocate support more efficiently.
+  </p>
+
+  <h2>Methods</h2>
+  <p>I worked on developing and validating a shortened Chinese version of the Bayley-III using data from 1,173 children under age 3.5 in rural China. The analysis combined:</p>
+  <p>Exploratory Factor Analysis to identify latent developmental domains and remove weak or cross-loading items.</p>
+  <p>Item Response Theory to select items with strong discrimination power.</p>
+  <p>Confirmatory Factor Analysis and correlation analyses to test whether the shortened forms retained validity against full Bayley-III scores and other early childhood development measures.</p>
+
+<h2>Results</h2>
+  <p>The final short form reduced the assessment from hundreds of items to a much smaller item set while maintaining meaningful relationships with full Bayley-III outcomes. The strongest tradeoff was a 36-item version, which substantially reduced testing burden while preserving concurrent validity with the original assessment.</p>
+  <Figure src="/images/research/latent-dynamics-adaptive-decision-networks/bigdata_figures.svg"
+               alt="Foraging task structure"/>
+
+<h2>What I learned</h2>
+  <p>This project was my first time understanding the idea that “more data” is not automatically better. The hard part was not just building a shorter test, it was deciding what information could be safely discarded. 
+  I learned that model fit, validity, and practical usability can point in different directions, and good research often means making that tradeoff explicit rather than pretending there is one perfect metric.</p>
+
+</Layout>

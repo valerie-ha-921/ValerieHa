@@ -1,0 +1,19 @@
+---
+import { withBase } from "../utils/url";
+
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  wide?: boolean;
+}
+
+const { src, alt, caption, wide = false } = Astro.props;
+// Root-relative paths (e.g. "/images/...") get the site's base path prefixed
+// automatically. Absolute URLs (http://, https://) pass through unchanged.
+const resolvedSrc = /^https?:\/\//.test(src) ? src : withBase(src);
+---
+<figure class:list={["figure", { "figure--wide": wide }]}>
+  <img src={resolvedSrc} alt={alt} loading="lazy" />
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

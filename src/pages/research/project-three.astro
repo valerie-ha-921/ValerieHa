@@ -1,0 +1,49 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Figure from "../../components/Figure.astro";
+---
+<Layout title="Investigating the Transgenerational Effects of Trauma">
+  <p class="section-label">Research</p>
+  <h1>Investigating the Transgenerational Effects of Trauma</h1>
+  <p class="grey-italics">Research done under the mentorship of Austin Campbell</p>
+
+  <h2>Problem</h2>
+  <p>Traumatic experiences have lasting effects on behavior, but an open question is whether some of those effects can extend beyond the individuals who directly experience them. 
+    This project investigated whether trauma-induced learned helplessness could be inherited across generations through epigenetic mechanisms rather than changes to DNA sequence itself.
+  </p>
+
+  <h2>Why it matters</h2>
+  <p>
+    If stressful experiences alter gene regulation in ways that can be passed to offspring, trauma is not solely an individual phenomenon—it may also shape biological responses across generations. 
+    Understanding these mechanisms could improve our understanding of psychiatric disorders such as PTSD, depression, and anxiety while helping bridge molecular biology with behavioral neuroscience.
+  </p>
+
+  <h2>Methods</h2>
+    <p>To isolate the behavioral consequences of trauma, I designed and built a custom ReVSA (Repetitive Visual Stimulus-Induced Arousal) apparatus using an Arduino-controlled servo motor that generated randomized overhead shadow stimuli over a 24-hour period. This paradigm induced repeated, uncontrollable visual threats while minimizing physical injury.</p>
+
+    <p>I used Drosophila melanogaster as a model organism because of their well-characterized genetics, short generation time, and conserved molecular pathways involved in neural function. 
+After trauma exposure, both traumatized and control flies were tested using a heat-induced climbing assay that quantified escape behavior as a measure of learned helplessness. 
+Offspring from both groups were then raised without trauma exposure and tested using the same behavioral assay to evaluate potential transgenerational effects.</p>
+    <Figure src="/images/research/latent-dynamics-adaptive-decision-networks/fly_setup.JPG"
+               alt="fly setup"
+               caption="ReVSA Setup: A custom setup was built for this experiment using an Arduino UNO R3 board and a Micro Servo Digitial SG90 Motor." />
+
+<h2>Results</h2>
+  <h3>Trauma reduces escape behavior</h3>
+  <p>The traumatized parent generation exhibited substantially lower escape performance than controls, consistent with learned helplessness induced by repeated uncontrollable stress.</p>
+  <Figure src="/images/research/latent-dynamics-adaptive-decision-networks/figure3.png"
+               alt="Foraging task structure"/>
+  <h3>Behavioral differences persist in offspring</h3>
+  <p>Although offspring never experienced the trauma themselves, descendants of traumatized flies continued to exhibit reduced escape performance relative to controls. 
+  The effect was smaller than in the parent generation but remained observable, suggesting a potential transgenerational influence on behavior.</p>
+  <Figure src="/images/research/latent-dynamics-adaptive-decision-networks/figure5.png"
+               alt="Foraging task structure"/>
+  <Figure src="/images/research/latent-dynamics-adaptive-decision-networks/figure6.png"
+               alt="Foraging task structure"/>
+
+<h2>What I learned</h2>
+  <p>This project changed how I thought about the relationship between genes and behavior. I began expecting that inheritance would be almost entirely determined by DNA sequence. Instead, I learned that experiences can leave molecular marks that may alter gene expression without changing the underlying genome.</p>
+
+  <p>Just as importantly, I learned how difficult it is to infer biological mechanism from behavioral observations alone. Although the behavioral differences were consistent with epigenetic inheritance, the experiment could not directly identify the molecular changes responsible. That realization shifted my perspective on experimental design: strong behavioral evidence generates hypotheses, but understanding why behavior changes requires connecting observations across multiple levels, from genes to neural circuits to behavior.</p>
+
+</Layout>
