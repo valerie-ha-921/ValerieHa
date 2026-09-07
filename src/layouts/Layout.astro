@@ -1,23 +1,36 @@
 ---
 import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
 import { withBase } from "../utils/url";
+import Trajectories from "../components/Trajectories.astro";
 
 interface Props {
   title: string;
   description?: string;
+  wide?: boolean;
 }
 
-const { title, description = "Research, projects, and writing." } = Astro.props;
+const {
+  title,
+  description = "Valerie Ha — computational neuroscience, machine learning, and quantum engineering. Research, projects, and writing.",
+  wide = false,
+} = Astro.props;
+
 const navItems = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
   { href: "/research", label: "Research" },
-  { href: "/philosophy", label: "Philosophy" },
-  { href: "/skills", label: "Skills" },
+  { href: "/projects", label: "Projects" },
+  { href: "/writing", label: "Writing" },
   { href: "/cv", label: "CV" },
   { href: "/contact", label: "Contact" },
 ];
-const currentPath = Astro.url.pathname;
+
+const here = Astro.url.pathname.replace(/\/$/, "");
+const isCurrent = (href: string) => {
+  const h = withBase(href).replace(/\/$/, "");
+  return here === h || (href !== "/" && here.startsWith(h + "/"));
+};
+const year = new Date().getFullYear();
+const pageTitle = /valerie\s*ha/i.test(title) ? title : `${title} — Valerie Ha`;
 ---
 
 <html lang="en">
@@ -26,24 +39,54 @@ const currentPath = Astro.url.pathname;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <link rel="icon" href={withBase("/favicon.svg")} type="image/svg+xml" />
-    <title>{title} — Valerie Ha</title>
+    <link
+      rel="preload"
+      href={withBase("/fonts/spectral-500.woff2")}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href={withBase("/fonts/archivo-latin.woff2")}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <title>{pageTitle}</title>
+    <ClientRouter />
   </head>
   <body>
-    <nav class="site-nav">
-      {navItems.map((item) => (
-        <a
-          href={withBase(item.href)}
-          aria-current={currentPath === withBase(item.href) ? "page" : undefined}
+    <Trajectories />
+
+    <div class="site-shell">
+      <nav class="site-nav" aria-label="Primary">
+        <a class="nav-home" href={withBase("/")} aria-current={here === "" ? "page" : undefined}
+          >Valerie&nbsp;Ha</a
         >
-          {item.label}
-        </a>
-      ))}
-    </nav>
-    <main class="site-wrap">
-      <slot />
-    </main>
-    <footer class="site-footer">
-      <p>Valerie Ha &middot; Updated {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long" })}</p>
-    </footer>
+        {
+          navItems.map((item) => (
+            <a
+              href={withBase(item.href)}
+              aria-current={isCurrent(item.href) ? "page" : undefined}
+            >
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+
+      <main class={`site-wrap${wide ? " is-wide" : ""}`} transition:animate="fade">
+        <slot />
+      </main>
+
+      <footer class="site-footer">
+        <span>Valerie Ha</span>
+        <span>
+          <a href="mailto:valerieha@uchicago.edu">valerieha@uchicago.edu</a>
+        </span>
+        <span>Updated {year}</span>
+      </footer>
+    </div>
   </body>
 </html>

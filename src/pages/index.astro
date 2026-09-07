@@ -1,27 +1,142 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { withBase } from "../utils/url";
+
+const selected = [
+  {
+    href: "/research/latent-dynamics-adaptive-decision-networks",
+    title: "Value-based decision-making in dynamic foraging",
+    blurb:
+      "What are the mechanisms that dynamically weight endogenous drive against exogenous capture in a hidden, changing environment?",
+    meta: ["Research", "in progress"],
+  },
+  {
+    href: "/research/project-two",
+    title: "Big Data on Little People",
+    blurb:
+      "Reducing a gold-standard early-childhood assessment to a 36-item short form without losing its validity, from 1,173 children in rural China.",
+    meta: ["Research", "completed"],
+  },
+  {
+    href: "/projects/research-copilot",
+    title: "Research copilot",
+    blurb:
+      "A tool for moving faster through the literature-to-analysis loop, built for my own workflow.",
+    meta: ["Project", "tool"],
+  },
+  {
+    href: "/projects/architecture-portfolio",
+    title: "Architecture portfolio",
+    blurb: "Drawings and models from studio work — structure as a way of thinking.",
+    meta: ["Project", "portfolio"],
+  },
+];
 ---
-<Layout title="Home">
-  <img class="headshot" src={withBase("/headshot.jpg")} alt="Headshot of Valerie Ha" />
 
-  <h1>Valerie Ha</h1>
-  <p class="identity-line">Computational Neuroscience &times; Machine Learning &times; Quantum Engineering</p>
+<Layout title="Valerie Ha">
+  <section class="hero">
+    <svg class="hero-arc" viewBox="0 0 600 420" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M598 8 C 520 120, 470 150, 360 175 S 150 210, 40 250" />
+    </svg>
 
-  <p>
-    I build computational models to understand how intelligent systems learn, remember, and make decisions under uncertainty. 
-    I am curious to uncover the principles of memory, agency, and adaptive behavior that span biological and artificial intelligence.
-    Over the long term, I hope to translate these insights to develop neurotechnology and, eventually, quantum-enabled systems for sensing and intelligent computation.
-  </p>
+    <h1 class="statement" data-reveal>
+      I'm interested in how biological brains and artificial machines
+      learn, remember, and <span class="thread-word">make decisions</span>.
+    </h1>
 
-  <div class="links-row">
-    <a href="https://www.linkedin.com/in/valerie-ha/" target="_blank" rel="noopener">LinkedIn</a>
-    <a href={withBase("/cv")}>CV</a>
-    <a href="mailto:valerieha@uchicago.edu">Email</a>
+    <p class="identity-line" data-reveal>
+      Computational Neuroscience and Quantum engineering at The University of Chicago
+    </p>
+
+    <div class="hero-actions" data-reveal>
+      <a class="action" href={withBase("/cv")}>CV</a>
+      <a class="action" href={withBase("/contact")}>Contact</a>
+    </div>
+
+    <p class="currently" data-reveal>
+      <b>Currently</b> Modeling latent dynamics in adaptive decision-making networks.
+    </p>
+  </section>
+
+  <div class="prose">
+    <p class="lede" data-reveal>
+      A lot of the processes we care about in the brain can't be measured directly. 
+      I've been researching how to recover the hidden process by connecting observable behavior to latent geometry in the recurrent dynamics.
+    </p>
   </div>
 
-  <h2>Currently</h2>
-  <p>
-    I'm working on the modeling of dynamic behavior.
+  <h2 data-reveal>Selected work</h2>
+  <ul class="index-list">
+    {
+      selected.map((s) => (
+        <li class="index-row" data-reveal>
+          <a class="row-title" href={withBase(s.href)}>
+            {s.title}
+          </a>
+          <p>{s.blurb}</p>
+          <span class="meta">
+            {s.meta.map((m, i) => (
+              <span class={i === 1 ? "tag" : ""}>{m}</span>
+            ))}
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="prose" data-reveal style="margin-top:2rem;">
+    The full record is under <a href={withBase("/research")}>Research</a>{" "}
+    and <a href={withBase("/projects")}>Projects</a>. For anything else,{" "}
+    <a href={withBase("/contact")}>get in touch</a>.
   </p>
 </Layout>
+
+<style>
+  .hero { position: relative; }
+
+  @media (max-width: 40rem) {
+    /* No forced vertical centring on phones — let the statement sit right
+       under the nav so it and its arc stay in the first viewport. */
+    .hero { min-height: 0; padding-top: 0.5rem; }
+    .hero .currently { padding-top: 2rem; }
+  }
+
+  /* Wide screens: let the hero sit left of the reading column, with the arc
+     breaking out to the right edge so the trajectory reads as arriving toward
+     the statement. */
+  @media (min-width: 64rem) {
+    .hero {
+      width: 44rem;
+      margin-left: clamp(-9rem, -7vw, -1.5rem);
+    }
+  }
+
+  .hero-arc {
+    position: absolute;
+    top: -1.5rem;
+    right: clamp(-13rem, -8vw, calc(-1 * var(--gutter)));
+    width: min(64%, 30rem);
+    height: 78%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .hero-arc path {
+    fill: none;
+    stroke: var(--bronze);
+    stroke-width: 1;
+    stroke-linecap: round;
+    opacity: 0.4;
+    stroke-dasharray: 1400;
+    stroke-dashoffset: 1400;
+    animation: arc-draw 1.5s var(--ease-traj) 0.15s forwards;
+  }
+  @keyframes arc-draw {
+    to { stroke-dashoffset: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-arc path { animation: none; stroke-dashoffset: 0; opacity: 0.28; }
+  }
+  @media (max-width: 40rem) {
+    .hero-arc { width: 70%; opacity: 0.8; }
+  }
+</style>

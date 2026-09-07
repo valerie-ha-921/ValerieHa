@@ -7,20 +7,29 @@ const groups = [
   { name: "Statistics", items: ["GLMs", "HMMs", "Bayesian inference"] },
   { name: "Data", items: ["pandas", "SQL"] },
   { name: "Visualization", items: ["matplotlib", "Plotly"] },
-  { name: "Neuroscience", items: ["Population analysis", "Decoding", "Manifold learning"] },
+  {
+    name: "Neuroscience",
+    items: ["Population analysis", "Decoding", "Manifold learning"],
+  },
 ];
 ---
 <Layout title="Skills">
-  <p class="section-label">Skills</p>
-  <h1>Skills</h1>
+  <h1 data-reveal>Skills</h1>
+  <p class="prose lede" data-reveal>
+    Methods and tools I reach for when recovering computation from data.
+  </p>
   <div class="skills-grid">
-    {groups.map((g) => (
-      <div>
-        <h3>{g.name}</h3>
-        <ul>
-          {g.items.map((item) => <li>{item}</li>)}
-        </ul>
-      </div>
-    ))}
+    {
+      groups.map((g) => (
+        <div data-reveal>
+          <h3>{g.name}</h3>
+          <ul>
+            {g.items.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
   </div>
 </Layout>

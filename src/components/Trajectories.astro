@@ -1,0 +1,413 @@
+---
+/**
+ * Trajectories — the site's motion identity, modelled on a spiking neuron.
+ *
+ * Two independent systems share one pointer position on a single behind-content
+ * canvas:
+ *
+ *  · A short-lived trail of glowing points — each an ochre radial-gradient blob
+ *    whose radius and opacity shrink with age, so it reads as an afterglow
+ *    rather than a drawn stroke. Cools to rest over ~1s.
+ *  · A threshold check on cursor speed (distance / time, exponentially smoothed
+ *    so one jittery frame can't false-trigger). Above ~0.55 px/ms, with a short
+ *    cooldown, it *fires* a spike: two to four short curved tendrils shot
+ *    outward, each easing its length over ~700ms and fading as it finishes; a
+ *    per-tendril bend offsets the control point so none look alike.
+ *
+ * Two supporting systems: hovering an interactive element sprouts a couple of
+ * hairline roots that draw in over ~0.5s and retract on leave; every internal
+ * navigation springs an arc from the click point to the incoming content.
+ *
+ * All of it is off under prefers-reduced-motion and on coarse pointers, and the
+ * site is a plain, fully navigable document without JavaScript.
+ */
+---
+
+<canvas id="field" transition:persist="traj-field" aria-hidden="true"></canvas>
+<canvas id="route-arc" transition:persist="traj-route" aria-hidden="true"></canvas>
+
+<script>
+  const REDUCE = matchMedia("(prefers-reduced-motion: reduce)");
+  const FINE = matchMedia("(pointer: fine)");
+  const OCHRE = "169,118,47";
+  const BRONZE = "138,90,43";
+
+  const ROOT_SEL =
+    "nav.site-nav a, .nav-home, .action, .index-row a, a.row-title, a.link, .links-row a";
+
+  let field: HTMLCanvasElement | null,
+    fctx: CanvasRenderingContext2D | null,
+    routeArc: HTMLCanvasElement | null,
+    rctx: CanvasRenderingContext2D | null;
+
+  let W = 0, H = 0, DPR = 1;
+  let raf = 0, running = false, booted = false, lastT = 0, idleFrames = 0;
+
+  const TRAIL_MS = 1000;          // afterglow lifetime
+  const SPEED_THRESHOLD = 0.55;   // px/ms of smoothed cursor speed to fire a spike
+  const SPIKE_COOLDOWN = 260;     // ms between spikes
+
+  // one pointer position, shared by both systems; speed is exponentially smoothed
+  const pt = { x: -1, y: -1, lastX: 0, lastY: 0, lastT: 0, speed: 0, has: false };
+  const trail: { x: number; y: number; t: number }[] = [];
+  let lastSpikeAt = 0;
+
+  interface Tendril {
+    x: number; y: number; ang: number; len: number; bend: number;
+    born: number; life: number;
+  }
+  const tendrils: Tendril[] = [];
+
+  interface RootSys {
+    el: Element;
+    ox: number; oy: number;
+    roots: { ang: number; len: number; kinks: number[] }[];
+    grow: number; state: "in" | "out";
+  }
+  const rootSystems = new Map<Element, RootSys>();
+
+  let clickPt: { x: number; y: number } | null = null;
+
+  function sizeCanvas(c: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+    c.width = Math.floor(W * DPR);
+    c.height = Math.floor(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    if (field && fctx) sizeCanvas(field, fctx);
+    if (routeArc && rctx) sizeCanvas(routeArc, rctx);
+  }
+
+  // deterministic small PRNG so a root system is stable frame to frame
+  function seeded(n: number) {
+    return () => {
+      n = (n * 1664525 + 1013904223) % 4294967296;
+      return n / 4294967296;
+    };
+  }
+
+  function fire(x: number, y: number, dirAng: number) {
+    const n = 2 + Math.floor(Math.random() * 3); // 2, 3 or 4
+    for (let i = 0; i < n; i++) {
+      const spread = (i - (n - 1) / 2) * 0.42 + (Math.random() - 0.5) * 0.5;
+      tendrils.push({
+        x, y,
+        ang: dirAng + spread,
+        len: 56 + Math.random() * 62,
+        bend: (Math.random() - 0.5) * 0.9, // offsets the curve's control point
+        born: performance.now(),
+        life: 640 + Math.random() * 150, // ~700ms
+      });
+    }
+  }
+
+  function addRoot(el: Element) {
+    if (rootSystems.has(el)) {
+      rootSystems.get(el)!.state = "in";
+      return;
+    }
+    const r = el.getBoundingClientRect();
+    const rnd = seeded(Math.round(r.left * 7 + r.top * 13 + r.width));
+    const roots = [];
+    const count = 2 + (rnd() > 0.65 ? 1 : 0);
+    for (let i = 0; i < count; i++) {
+      roots.push({
+        ang: Math.PI * (0.62 + rnd() * 0.76), // downward-ish fan
+        len: 16 + rnd() * 20,
+        kinks: [rnd() * 0.5 - 0.25, rnd() * 0.5 - 0.25],
+      });
+    }
+    rootSystems.set(el, {
+      el,
+      ox: r.left + Math.min(r.width * 0.5, 14),
+      oy: r.bottom - 1,
+      roots,
+      grow: 0,
+      state: "in",
+    });
+  }
+  function removeRoot(el: Element) {
+    const s = rootSystems.get(el);
+    if (s) s.state = "out";
+  }
+
+  function step(now: number) {
+    raf = requestAnimationFrame(step);
+    if (!fctx) return;
+    const dt = Math.min(now - lastT || 16, 48);
+    lastT = now;
+    fctx.clearRect(0, 0, W, H);
+    fctx.lineCap = "round";
+    fctx.lineJoin = "round";
+
+    // ---- system 1: afterglow trail — radial-gradient blobs, shrinking ----
+    while (trail.length && trail[0].t < now - TRAIL_MS) trail.shift();
+    for (let i = 0; i < trail.length; i++) {
+      const p = trail[i];
+      const k = 1 - (now - p.t) / TRAIL_MS; // 1 = fresh, 0 = spent
+      if (k <= 0.02) continue;
+      const r = 2 + 11 * k; // radius shrinks with age
+      const a = 0.3 * k * k; // opacity shrinks faster
+      const grad = fctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+      grad.addColorStop(0, `rgba(${OCHRE},${a})`);
+      grad.addColorStop(1, `rgba(${OCHRE},0)`);
+      fctx.fillStyle = grad;
+      fctx.fillRect(p.x - r, p.y - r, r * 2, r * 2);
+    }
+
+    // ---- system 2: spike — 2–4 curved tendrils, length over ~700ms ------
+    for (let i = tendrils.length - 1; i >= 0; i--) {
+      const T = tendrils[i];
+      const age = now - T.born;
+      if (age >= T.life) {
+        tendrils.splice(i, 1);
+        continue;
+      }
+      const p = age / T.life;
+      const grow = 1 - Math.pow(1 - p, 3); // ease its length out over the whole life
+      const fade = p < 0.6 ? 1 : 1 - (p - 0.6) / 0.4; // fade as it finishes
+      const ex = T.x + Math.cos(T.ang) * T.len * grow;
+      const ey = T.y + Math.sin(T.ang) * T.len * grow;
+      const nx = Math.cos(T.ang + Math.PI / 2);
+      const ny = Math.sin(T.ang + Math.PI / 2);
+      const cx = (T.x + ex) / 2 + nx * T.len * T.bend * grow;
+      const cy = (T.y + ey) / 2 + ny * T.len * T.bend * grow;
+      fctx.strokeStyle = `rgba(${BRONZE},${0.5 * fade})`;
+      fctx.lineWidth = 1;
+      fctx.beginPath();
+      fctx.moveTo(T.x, T.y);
+      fctx.quadraticCurveTo(cx, cy, ex, ey);
+      fctx.stroke();
+    }
+
+    // ---- hover roots ---------------------------------------------------
+    for (const [el, s] of rootSystems) {
+      s.grow += (s.state === "in" ? dt / 500 : -dt / 320);
+      if (s.grow <= 0 && s.state === "out") {
+        rootSystems.delete(el);
+        continue;
+      }
+      s.grow = Math.max(0, Math.min(1, s.grow));
+      const r = el.getBoundingClientRect();
+      s.ox = r.left + Math.min(r.width * 0.5, 14);
+      s.oy = r.bottom - 1;
+      const eg = 1 - Math.pow(1 - s.grow, 2);
+      fctx.strokeStyle = `rgba(${BRONZE},${0.55 * s.grow})`;
+      fctx.lineWidth = 0.9;
+      for (const rt of s.roots) {
+        fctx.beginPath();
+        fctx.moveTo(s.ox, s.oy);
+        let x = s.ox, y = s.oy, ang = rt.ang;
+        const segs = 3;
+        for (let j = 0; j < segs; j++) {
+          ang += rt.kinks[j % rt.kinks.length];
+          const seg = (rt.len / segs) * eg;
+          x += Math.cos(ang) * seg;
+          y += Math.sin(ang) * seg;
+          fctx.lineTo(x, y);
+        }
+        fctx.stroke();
+      }
+    }
+
+    // ---- idle: nothing to animate, park the loop ---------------------
+    if (!trail.length && !tendrils.length && !rootSystems.size) {
+      if (++idleFrames > 24) stopLoop();
+    } else {
+      idleFrames = 0;
+    }
+  }
+
+  function wake() {
+    idleFrames = 0;
+    startLoop();
+  }
+
+  function onPointerMove(e: PointerEvent) {
+    if (!FINE.matches || REDUCE.matches) return;
+    const now = performance.now();
+    const x = e.clientX, y = e.clientY;
+
+    if (pt.has) {
+      const dt = Math.max(1, now - pt.lastT);
+      const d = Math.hypot(x - pt.lastX, y - pt.lastY);
+      pt.speed = pt.speed * 0.6 + (d / dt) * 0.4; // px/ms, exponentially smoothed
+      if (pt.speed > SPEED_THRESHOLD && now - lastSpikeAt > SPIKE_COOLDOWN) {
+        lastSpikeAt = now;
+        fire(x, y, Math.atan2(y - pt.lastY, x - pt.lastX));
+      }
+    }
+
+    pt.lastX = x; pt.lastY = y; pt.lastT = now;
+    pt.x = x; pt.y = y; pt.has = true;
+    trail.push({ x, y, t: now });
+    if (trail.length > 120) trail.shift();
+    wake();
+  }
+
+  function playArc(from: { x: number; y: number }) {
+    if (!routeArc || !rctx) return;
+    const to = { x: Math.min(W * 0.34, 360), y: H * 0.42 };
+    const mx = (from.x + to.x) / 2 + (to.y - from.y) * 0.22;
+    const my = (from.y + to.y) / 2 - Math.abs(to.x - from.x) * 0.12;
+    const start = performance.now();
+    const dur = 460;
+    const draw = (n: number) => {
+      const p = Math.min((n - start) / dur, 1);
+      const e = 1 - Math.pow(1 - p, 3);
+      rctx!.clearRect(0, 0, W, H);
+      rctx!.beginPath();
+      const steps = 60;
+      for (let i = 0; i <= steps * e; i++) {
+        const s = i / steps;
+        const x = (1 - s) * (1 - s) * from.x + 2 * (1 - s) * s * mx + s * s * to.x;
+        const y = (1 - s) * (1 - s) * from.y + 2 * (1 - s) * s * my + s * s * to.y;
+        i ? rctx!.lineTo(x, y) : rctx!.moveTo(x, y);
+      }
+      rctx!.strokeStyle = `rgba(${BRONZE},${0.55 * (1 - Math.max(0, p - 0.7) / 0.3)})`;
+      rctx!.lineWidth = 1.25;
+      rctx!.stroke();
+      if (p < 1) requestAnimationFrame(draw);
+      else rctx!.clearRect(0, 0, W, H);
+    };
+    requestAnimationFrame(draw);
+  }
+
+  function startLoop() {
+    if (running || REDUCE.matches || !FINE.matches) return;
+    running = true;
+    lastT = performance.now();
+    raf = requestAnimationFrame(step);
+  }
+  function stopLoop() {
+    running = false;
+    cancelAnimationFrame(raf);
+  }
+
+  function boot() {
+    field = document.getElementById("field") as HTMLCanvasElement;
+    routeArc = document.getElementById("route-arc") as HTMLCanvasElement;
+    if (!field) return;
+    fctx = field.getContext("2d");
+    rctx = routeArc?.getContext("2d") ?? null;
+    resize();
+
+    window.addEventListener("resize", resize, { passive: true });
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    window.addEventListener("blur", () => {
+      pt.has = false;
+      pt.speed = 0;
+      trail.length = 0;
+    });
+
+    document.addEventListener("pointerover", (e) => {
+      if (!FINE.matches || REDUCE.matches) return;
+      const el = (e.target as Element)?.closest?.(ROOT_SEL);
+      if (el) {
+        addRoot(el);
+        wake();
+      }
+    });
+    document.addEventListener("pointerout", (e) => {
+      const el = (e.target as Element)?.closest?.(ROOT_SEL);
+      if (el) removeRoot(el);
+    });
+    document.addEventListener("focusin", (e) => {
+      if (REDUCE.matches) return;
+      const el = (e.target as Element)?.closest?.(ROOT_SEL);
+      if (el) {
+        addRoot(el);
+        wake();
+      }
+    });
+    document.addEventListener("focusout", (e) => {
+      const el = (e.target as Element)?.closest?.(ROOT_SEL);
+      if (el) removeRoot(el);
+    });
+
+    document.addEventListener(
+      "click",
+      (e) => {
+        const a = (e.target as Element)?.closest?.("a[href]") as HTMLAnchorElement | null;
+        if (
+          a &&
+          a.origin === location.origin &&
+          !a.hasAttribute("download") &&
+          a.target !== "_blank" &&
+          !e.metaKey &&
+          !e.ctrlKey
+        ) {
+          clickPt = { x: e.clientX, y: e.clientY };
+        }
+      },
+      true
+    );
+    document.addEventListener("astro:before-swap", () => {
+      if (!REDUCE.matches && clickPt) playArc(clickPt);
+      trail.length = 0;
+      tendrils.length = 0;
+      rootSystems.clear();
+      pt.has = false;
+      pt.speed = 0;
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stopLoop();
+      else startLoop();
+    });
+    REDUCE.addEventListener?.("change", () => {
+      if (REDUCE.matches) {
+        stopLoop();
+        fctx?.clearRect(0, 0, W, H);
+      } else startLoop();
+    });
+
+    startLoop();
+  }
+
+  function perPage() {
+    document.documentElement.classList.add("reveal-ready");
+    const els = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+    if (REDUCE.matches || !("IntersectionObserver" in window)) {
+      els.forEach((el) => el.classList.add("is-revealed"));
+    } else {
+      const io = new IntersectionObserver(
+        (ents) => {
+          ents.forEach((en) => {
+            if (en.isIntersecting) {
+              en.target.classList.add("is-revealed");
+              io.unobserve(en.target);
+            }
+          });
+        },
+        { rootMargin: "0px 0px -7% 0px", threshold: 0.01 }
+      );
+      const vh = window.innerHeight;
+      let below = 0;
+      els.forEach((el) => {
+        if (el.getBoundingClientRect().top < vh * 0.92) {
+          el.classList.add("is-revealed");
+          return;
+        }
+        el.style.setProperty("--reveal-i", String(below++ % 8));
+        el.classList.add("pre-reveal");
+        io.observe(el);
+      });
+    }
+    clickPt = null;
+  }
+
+  function onLoad() {
+    if (!booted) {
+      booted = true;
+      boot();
+    }
+    perPage();
+  }
+
+  document.addEventListener("astro:page-load", onLoad);
+  if (document.readyState !== "loading") onLoad();
+  else document.addEventListener("DOMContentLoaded", onLoad);
+</script>

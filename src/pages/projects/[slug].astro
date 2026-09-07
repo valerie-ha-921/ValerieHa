@@ -1,0 +1,55 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { withBase } from "../../utils/url";
+import { projects, bySlug } from "../../data/projects";
+
+export function getStaticPaths() {
+  return projects.map((p) => ({ params: { slug: p.slug } }));
+}
+
+const { slug } = Astro.params;
+const project = bySlug(slug!);
+if (!project) return Astro.redirect(withBase("/projects"));
+---
+
+<Layout title={project.title}>
+  <p class="prose" style="margin-bottom:0.5rem;" data-reveal>
+    <a href={withBase("/projects")}>← Projects</a>
+  </p>
+
+  <h1 data-reveal>{project.title}</h1>
+
+  <p class="entry-meta" data-reveal>
+    <span>{project.domain}</span>
+    {project.year && <span>{project.year}</span>}
+    <span>{project.status ?? "in progress"}</span>
+  </p>
+
+  <p class="prose lede" data-reveal>{project.summary}</p>
+
+  {
+    project.link && (
+      <p class="prose" data-reveal>
+        <a class="action" href={project.link.href} target="_blank" rel="noopener">
+          {project.link.label}
+        </a>
+      </p>
+    )
+  }
+
+  {
+    project.body?.map((sec) => (
+      <div class="prose">
+        <h2 data-reveal>{sec.heading}</h2>
+        {sec.paras.map((t) => (
+          <p data-reveal>{t}</p>
+        ))}
+      </div>
+    ))
+  }
+
+  {
+    /* Valerie: for the draft projects, expand here — method, tools, outcomes,
+       figures (use the Figure component), and a live or repository link. */
+  }
+</Layout>

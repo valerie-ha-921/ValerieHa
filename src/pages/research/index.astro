@@ -7,36 +7,49 @@ const projects = [
     slug: "latent-dynamics-adaptive-decision-networks",
     title: "Understanding Latent Dynamics in Adaptive Decision-Making Networks",
     status: "In progress",
-    oneLine: "How do RNNs trained on foraging tasks represent belief states, and what do their fixed points reveal about strategy switching?",
+    oneLine:
+      "How do RNNs trained on foraging tasks represent belief states, and what do their fixed points reveal about strategy switching?",
   },
   {
     slug: "project-two",
-    title: "Big Data on Little People: Towards Early Skill Assessment at Scale in Resource-poor Field Settings",
+    title:
+      "Big Data on Little People: Towards Early Skill Assessment at Scale in Resource-poor Field Settings",
     status: "Completed, under review",
-    oneLine: "Can a gold-standard assessment of early childhood development be reduced to a much shorter instrument while preserving its ability to accurately measure developmental outcomes?",
+    oneLine:
+      "Can a gold-standard assessment of early childhood development be reduced to a much shorter instrument while preserving its ability to measure developmental outcomes?",
   },
   {
     slug: "project-three",
     title: "Investigating the Transgenerational Effects of Trauma",
     status: "Completed",
-    oneLine: "Can exposure to uncontrollable stress produce behavioral changes that persist into the next generation through epigenetic mechanisms?",
+    oneLine:
+      "Can exposure to uncontrollable stress produce behavioral changes that persist into the next generation through epigenetic mechanisms?",
   },
 ];
 ---
+
 <Layout title="Research">
-  <p class="section-label">Research</p>
-  <h1>Research</h1>
-  <p>
-    Work tied to a lab, PI, or publication.
+  <h1 data-reveal>Research</h1>
+  <p class="prose lede" data-reveal>
+    Work tied to a lab, a principal investigator, or a publication. A recurring
+    question runs through it: how do you recover the hidden process that produced the
+    behavior you can measure?
   </p>
 
-  <div class="card-grid">
-    {projects.map((p) => (
-      <div class="project-card">
-        <h3><a href={withBase(`/research/${p.slug}`)}>{p.title}</a></h3>
-        <p>{p.oneLine}</p>
-        <p class="meta">Status: {p.status}</p>
-      </div>
-    ))}
-  </div>
+  <ul class="index-list">
+    {
+      projects.map((p) => (
+        <li class="index-row" data-reveal>
+          <a class="row-title" href={withBase(`/research/${p.slug}`)}>
+            {p.title}
+          </a>
+          <p>{p.oneLine}</p>
+          <span class="meta">
+            <span class="tag">research</span>
+            <span>{p.status}</span>
+          </span>
+        </li>
+      ))
+    }
+  </ul>
 </Layout>

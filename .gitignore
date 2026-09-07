@@ -22,3 +22,10 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# impeccable design skill — tooling & scratch, not project source
+.claude/
+.impeccable/
+.github/agents/
+.github/hooks/
+.github/skills/

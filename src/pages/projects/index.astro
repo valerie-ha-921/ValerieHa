@@ -1,0 +1,34 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { withBase } from "../../utils/url";
+import { projects } from "../../data/projects";
+---
+
+<Layout title="Projects">
+  <h1 data-reveal>Projects</h1>
+  <p class="prose lede" data-reveal>
+    Self-directed work, kept separate from the lab research: tools I build for my own
+    workflow, design and editorial projects, and things made to understand a problem by
+    making it.
+  </p>
+
+  <ul class="index-list">
+    {
+      projects.map((p) => (
+        <li class="index-row" data-reveal>
+          <a class="row-title" href={withBase(`/projects/${p.slug}`)}>
+            {p.title}
+          </a>
+          <p>{p.summary}</p>
+          <span class="meta">
+            <span class="tag">{p.domain}</span>
+            {p.year && <span>{p.year}</span>}
+            <span class={p.draft ? "pending" : ""}>
+              {p.status ?? (p.draft ? "in progress" : "")}
+            </span>
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+</Layout>

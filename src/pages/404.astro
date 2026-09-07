@@ -1,0 +1,19 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { withBase } from "../utils/url";
+---
+
+<Layout title="Off the path">
+  <section class="lost">
+    <h1 data-reveal>No route to this page.</h1>
+    <p class="prose lede" data-reveal>
+      The trajectory ran off the edge of the field. Nothing lives at this address.
+    </p>
+    <p class="prose" data-reveal>
+      Head back to the <a href={withBase("/")}>start</a>, or jump to{" "}
+      <a href={withBase("/research")}>Research</a>,{" "}
+      <a href={withBase("/projects")}>Projects</a>, or{" "}
+      <a href={withBase("/contact")}>Contact</a>.
+    </p>
+  </section>
+</Layout>

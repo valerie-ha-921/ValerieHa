@@ -2,39 +2,81 @@
 import Layout from "../layouts/Layout.astro";
 ---
 <Layout title="Research Philosophy">
-  <p class="section-label">Philosophy</p>
-  <h1>Research Philosophy</h1>
-  <p>A lot of the things we care about can't be observed directly.</p>
-  <p>
-  Whether studying trauma, child development, or neural networks, we're usually limited to indirect measurements like behavior, test responses, neural activity, or model outputs. 
-  The scientific challenge is to recover the hidden process that generated those observations. </p>
-  <p>That question first appeared in my work on transgenerational trauma, where behavioral changes suggested underlying epigenetic mechanisms that could not be measured directly. 
-  It resurfaced while developing a shortened developmental assessment, where latent cognitive abilities had to be inferred from hundreds of behavioral test items. 
-  Now, it motivates my work in computational neuroscience, where I study how recurrent neural networks organize internal representations while solving adaptive decision-making tasks.</p>
+  <h1 data-reveal>Research philosophy</h1>
 
-  <h2>What kinds of questions excite me</h2>
-  <p>I enjoy problems where the observable behavior is simple but the underlying computation is not. 
-  I'm fascinated whenever multiple organisms or algorithms produce nearly identical outputs while relying on fundamentally different internal representations. 
-  Understanding those hidden computations and learning how to recover them is the motivation that connects most of my work.</p>
+  <div class="prose">
+    <p class="lede" data-reveal>
+      A lot of the things we care about can't be observed directly.
+    </p>
+    <p data-reveal>
+      Whether the subject is trauma, child development, or neural networks, we're
+      usually limited to indirect measurements — behavior, test responses, neural
+      activity, model outputs. The scientific challenge is to recover the hidden process
+      that generated those observations.
+    </p>
+    <p data-reveal>
+      That question first appeared in my work on transgenerational trauma, where
+      behavioral changes suggested epigenetic mechanisms that could not be measured
+      directly. It resurfaced while developing a shortened developmental assessment,
+      where latent cognitive abilities had to be inferred from hundreds of behavioral
+      test items. Now it motivates my work in computational neuroscience, where I study
+      how recurrent neural networks organize internal representations while solving
+      adaptive decision-making tasks.
+    </p>
 
-  <h2>Current questions</h2>
-  <p>How do recurrent neural networks organize their hidden-state geometry while solving sequential decision-making tasks?</p>
-  <p>Which analyses genuinely reveal computation (fixed points, basin structure, manifold geometry)?</p>
-  <p>Can latent-state models such as GLM-HMMs recover meaningful computational strategies, or are they mostly descriptive?</p>
-  <p>How should we compare the internal computations of biological brains and artificial neural networks?</p>
+    <h2 data-reveal>What kinds of questions excite me</h2>
+    <p data-reveal>
+      I enjoy problems where the observable behavior is simple but the underlying
+      computation is not. I'm fascinated whenever multiple organisms or algorithms
+      produce nearly identical outputs while relying on fundamentally different internal
+      representations. Understanding those hidden computations, and learning how to
+      recover them, is the motivation that connects most of my work.
+    </p>
 
-  <h2>Open problems</h2>
-  <p>I'm also interested in understanding which latent representations remain consistent across independently trained networks. 
-  If multiple models solve the same task with similar behavior but different internal dynamics, what aspects of computation are truly fundamental?
-  Longer term, I want to understand how these ideas scale from simplified behavioral tasks to richer neural population recordings and eventually to closed-loop neurotechnology.</p>
+    <h2 data-reveal>Current questions</h2>
+    <p data-reveal>
+      How do recurrent neural networks organize their hidden-state geometry while
+      solving sequential decision-making tasks?
+    </p>
+    <p data-reveal>
+      Which analyses genuinely reveal computation — fixed points, basin structure,
+      manifold geometry?
+    </p>
+    <p data-reveal>
+      Can latent-state models such as GLM-HMMs recover meaningful computational
+      strategies, or are they mostly descriptive?
+    </p>
+    <p data-reveal>
+      How should we compare the internal computations of biological brains and
+      artificial neural networks?
+    </p>
 
-  <h2>Things I've changed my mind about</h2>
-  <h3>1. Trusting beautiful visualizations too quickly</h3>
-  <p>While analyzing hidden-state manifolds, I initially assumed that visually compelling PCA trajectories reflected meaningful computation. 
-  Repeatedly checking my analyses taught me that attractive plots are easy to generate, and surprisingly easy to misinterpret. 
-  I've become much more careful about validating every visualization against the underlying data and model assumptions.</p>
-  <h3>2. Assuming that agreement implied identical computation</h3>
-  <p>Some of the most productive parts of my projects have started with results that looked wrong. 
-  An unexpected transition matrix, a strange latent trajectory, or a model behaving differently than intuition predicted has often forced me to reconsider my assumptions. 
-  I've learned to treat surprising results as opportunities to understand the system more deeply rather than simply trying to make them disappear.</p>
+    <h2 data-reveal>Open problems</h2>
+    <p data-reveal>
+      I'm interested in which latent representations stay consistent across
+      independently trained networks. If several models solve the same task with similar
+      behavior but different internal dynamics, what aspects of computation are truly
+      fundamental? Longer term, I want to understand how these ideas scale from
+      simplified behavioral tasks to richer neural population recordings and eventually
+      to closed-loop neurotechnology.
+    </p>
+
+    <h2 data-reveal>Things I've changed my mind about</h2>
+    <h3 data-reveal>Trusting beautiful visualizations too quickly</h3>
+    <p data-reveal>
+      While analyzing hidden-state manifolds, I assumed that visually compelling PCA
+      trajectories reflected meaningful computation. Checking my analyses repeatedly
+      taught me that attractive plots are easy to generate and surprisingly easy to
+      misinterpret. I've become much more careful about validating every visualization
+      against the underlying data and model assumptions.
+    </p>
+    <h3 data-reveal>Assuming that agreement implied identical computation</h3>
+    <p data-reveal>
+      Some of the most productive parts of my projects started with results that looked
+      wrong. An unexpected transition matrix, a strange latent trajectory, or a model
+      behaving differently than intuition predicted has often forced me to reconsider my
+      assumptions. I treat surprising results as openings to understand the system more
+      deeply rather than problems to make disappear.
+    </p>
+  </div>
 </Layout>
